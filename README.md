@@ -21,10 +21,19 @@ Excelデータの操作やMicrosoft Access, Outlookとの連携を通じて、�
     pip install -r requirements.txt
     ```
 
-3. 必要に応じて、設定ファイル（例: `.env`）を作成・設定します。
+## 使用方法
 
-    **例:**
-    ```bash
-    export DATABASE_URL="your-database-url"
-    ```
+スクリプトを実行するには、以下のコマンドを使います。
+フォルダ名には、実行したい業務名を入力します。
+
+```bash
+python <フォルダ名>/main.py
+```
+
+## Requirements
+- pywin32
+- pyyaml
+- pandas
+- openpyxl
+- pyodbc
 
