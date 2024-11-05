@@ -17,6 +17,7 @@ Excelデータの操作やMicrosoft Access, Outlookとの連携を通じて、�
     プロジェクトには以下の依存関係があります。`requirements.txt` を使ってインストールできます。
 
     ```bash
+    cd automation-with-python
     pip install -r requirements.txt
     ```
 
