@@ -43,9 +43,9 @@ python <フォルダ名>/main.py
 ```
 
 ## Requirements
-- pywin32
-- pyyaml
-- pandas
-- openpyxl
-- pyodbc
+- pywin32 ：outlookとの連携
+- pyyaml  ：YAMLファイルの読み込み
+- pandas  ：データフレーム
+- openpyxl：エクセルファイルの読み書き
+- pyodbc  ：Microsoft Accessとの接続
 
