@@ -80,15 +80,22 @@ def excel_to_set(file_path, box):
 def main():
     file_path = r"C:\Users\lenovo02\Desktop\自動化\検品チェック\入力済み.xlsx"
     db_file = r"C:\Users\lenovo02\Desktop\自動化\検品チェック\database.accdb"
-    start_time = '2024-10-27 17:00:00'
-    end_time = '2024-10-29 12:00:00'
+
+    ##################################
+    ############ 変更部分 ############ 
+    start_time = '2024-11-16 17:00:00'
+    end_time = '2024-11-22 12:00:00'
+    ##################################
+    ##################################
 
     dt_now = datetime.datetime.now()
     def_year = dt_now.strftime("%Y")
     def_month = dt_now.strftime("%m")  # 2桁の月
     def_day = dt_now.strftime("%d")     # 2桁の日
 
-    output_dir = f"検品チェック/{def_year}-{def_month}-{def_day}"
+    print(f"{def_year}-{def_month}-{def_day}のチェックを開始します。")
+
+    output_dir = f"検品チェック/チェック結果/{def_year}-{def_month}-{def_day}"
     # 出力ディレクトリを確認・作成
     ensure_output_directory(output_dir)
 
@@ -108,7 +115,9 @@ def main():
 
     result = sorted(result)
 
-    print(result)
+    print("チェックが完了しました。")
+
+    #print(result)
 
 
 if __name__ == "__main__":
