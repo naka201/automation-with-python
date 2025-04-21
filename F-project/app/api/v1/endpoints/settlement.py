@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File, Query
 from fastapi.responses import FileResponse
 from app.services.settlement_service import generate_settlement_files
 from typing import List
@@ -15,10 +15,11 @@ router = APIRouter()
 
 @router.post("/settlement/generate")
 async def create_settlement(
-    input_file: UploadFile = File(...),
-    output_files: List[UploadFile] = File(...),
-    specified_date: str = None,
-    pic : str = None
+    input_file: UploadFile = File(..., description="ライブ結果"),
+    template_buyer: UploadFile = File(..., description="販売用テンプレート"),
+    template_seller: UploadFile = File(..., description="出品用テンプレート"),
+    specified_date: str = Query(None, alias="日付"),
+    pic: str = Query(None, alias="担当")
 ):
     try:
         # フォルダを処理前に削除
@@ -37,7 +38,7 @@ async def create_settlement(
 
         # Save the uploaded output files temporarily
         output_file_paths = []
-        for output_file in output_files:
+        for output_file in [template_buyer, template_seller]:
             output_file_path = os.path.join(output_folder, output_file.filename)
             with open(output_file_path, "wb") as f:
                 f.write(await output_file.read())
@@ -53,7 +54,6 @@ async def create_settlement(
         zip_file_path = f"{folder_path}.zip"
         shutil.make_archive(folder_path, 'zip', folder_path)
         logger.info(f"Created ZIP file: {zip_file_path}")
-
 
         return FileResponse(zip_file_path, filename=os.path.basename(zip_file_path))
     except Exception as e:

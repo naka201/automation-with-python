@@ -18,6 +18,9 @@ async def generate_settlement_files(input_file: str, output_files: List[str], fi
     """
     指定されたExcelファイルを基に購入者ごとの精算書を作成する関数。
     """
+    if pic is None:
+        raise ValueError("担当 (pic) が指定されていません")
+    
     # データ読み込み
     raw_data = pd.read_excel(input_file, sheet_name='2025.01')
 

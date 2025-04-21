@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import os
 import shutil
 
-def generate_settlement_files(input_file, output_file, specified_date=None):
+def generate_settlement_files(input_file, output_file, file_cnt, specified_date=None):
     """
     指定されたExcelファイルを基に購入者ごとの精算書を作成する関数。
     """
@@ -308,6 +308,9 @@ def generate_settlement_files(input_file, output_file, specified_date=None):
 input_file = "/Users/nakanishitakumi/Library/CloudStorage/OneDrive-KyushuInstituteOfTechnolgy/自動化/automation-with-python/精算書作成/2025.01.07.xlsx"
 settlement_buy = '/Users/nakanishitakumi/Library/CloudStorage/OneDrive-KyushuInstituteOfTechnolgy/自動化/automation-with-python/精算書作成/精算書_販売.xlsx'
 settlement_sell = '/Users/nakanishitakumi/Library/CloudStorage/OneDrive-KyushuInstituteOfTechnolgy/自動化/automation-with-python/精算書作成/精算書_出品.xlsx'
+
+file_cnt = 0
+specified_date = "2024-12-07"
 
 #generate_settlement_files(input_file, settlement_buy)
 generate_settlement_files(input_file, settlement_sell)
