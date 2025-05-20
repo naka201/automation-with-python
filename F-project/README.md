@@ -3,18 +3,21 @@
 このプロジェクトは、FastAPIを使用して以下の2つの主要な機能を提供します：
 1. 自動化業務の管理と実行
 2. 購入者および出品者ごとの精算書の生成
+3. ブランド検索とハイライト機能
 
 ## プロジェクト構成
 
 ```
-unified-project/
+F-project/
     app/
         main.py                # アプリケーションのエントリポイント
         routers/
             tasks.py           # 自動化業務のルーター
+            brand_search.py    # ブランド検索のルーター
         services/
             task_service.py    # 自動化業務のビジネスロジック
             settlement_service.py # 精算書生成のビジネスロジック
+            brand_search_service.py # ブランド検索のビジネスロジック
         schemas/
             __init__.py        # データスキーマの定義
         api/
@@ -31,12 +34,13 @@ unified-project/
 
 ## 機能
 
-### 1. 自動化業務の管理
-- 利用可能な自動化業務の一覧を取得
-- 特定の業務を実行
+### 1. ブランド検索とハイライト機能
+- Excelファイルからブランドリストを読み込み
+- PDFファイル内でブランドを検索
+- 検索結果をExcelファイルにハイライト表示
 
 #### エンドポイント
-- **GET /tasks**: 利用可能な自動化業務の一覧を取得します。
+- **POST /process-files/**: ブランド検索とハイライト処理を実行します。
 
 #### 使用例
 ```bash
@@ -73,6 +77,7 @@ curl -X POST "http://localhost:8000/api/v1/settlement/generate" \
 
 #### レスポンス
 生成された精算書を含むZIPファイルが返されます。
+ハイライト処理されたExcelファイルが返されます。
 
 ---
 
@@ -81,7 +86,7 @@ curl -X POST "http://localhost:8000/api/v1/settlement/generate" \
 ### 1. リポジトリをクローン
 ```bash
 git clone <repository-url>
-cd unified-project
+cd F-project
 ```
 
 ### 2. 必要な依存関係をインストール
@@ -99,13 +104,10 @@ uvicorn app.main:app --reload
 ## 使用方法
 
 1. ブラウザまたはAPIクライアントを使用して、以下のURLにアクセスします：
+   - APIドキュメント: http://localhost:8000/docs
    - 自動化業務の一覧: `http://localhost:8000/tasks`
    - 精算書生成: `http://localhost:8000/api/v1/settlement/generate`
+   - ブランド検索: http://localhost:8000/process-files/
 
 2. 必要に応じて、エンドポイントにリクエストを送信して機能を利用します。
 
----
-
-## ライセンス
-
-このプロジェクトはMITライセンスの下で提供されています。
