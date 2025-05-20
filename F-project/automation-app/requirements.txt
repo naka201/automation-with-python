@@ -1,6 +1,0 @@
-FastAPI
-uvicorn
-pandas
-openpyxl
-python-multipart
-pydantic
