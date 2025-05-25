@@ -1,9 +1,8 @@
-# Unified Automation and Settlement Project
+# Automation with FastAPI Project
 
 このプロジェクトは、FastAPIを使用して以下の2つの主要な機能を提供します：
-1. 自動化業務の管理と実行
-2. 購入者および出品者ごとの精算書の生成
-3. ブランド検索とハイライト機能
+1. 購入者および出品者ごとの精算書の生成
+2. ブランド検索とハイライト機能
 
 ## プロジェクト構成
 
