@@ -1,4 +1,4 @@
-# Automation with FastAPI Project
+# Automation with FastAPI
 
 このプロジェクトは、FastAPIを使用して以下の2つの主要な機能を提供します：
 1. 購入者および出品者ごとの精算書の生成
