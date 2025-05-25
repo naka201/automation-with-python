@@ -41,20 +41,6 @@ F-project/
 #### エンドポイント
 - **POST /process-files/**: ブランド検索とハイライト処理を実行します。
 
-#### 使用例
-```bash
-curl http://localhost:8000/tasks
-```
-
-#### レスポンス例
-```json
-[
-    {"id": 1, "name": "精算書作成", "description": "精算書を作成するタスク"},
-    {"id": 2, "name": "データ集計", "description": "データを集計するタスク"},
-    {"id": 3, "name": "レポート生成", "description": "レポートを生成するタスク"}
-]
-```
-
 ---
 
 ### 2. 精算書の生成
