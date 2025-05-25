@@ -1,9 +1,8 @@
-# Unified Automation and Settlement Project
+# Automation with FastAPI
 
 このプロジェクトは、FastAPIを使用して以下の2つの主要な機能を提供します：
-1. 自動化業務の管理と実行
-2. 購入者および出品者ごとの精算書の生成
-3. ブランド検索とハイライト機能
+1. 購入者および出品者ごとの精算書の生成
+2. ブランド検索とハイライト機能
 
 ## プロジェクト構成
 
@@ -41,20 +40,6 @@ F-project/
 
 #### エンドポイント
 - **POST /process-files/**: ブランド検索とハイライト処理を実行します。
-
-#### 使用例
-```bash
-curl http://localhost:8000/tasks
-```
-
-#### レスポンス例
-```json
-[
-    {"id": 1, "name": "精算書作成", "description": "精算書を作成するタスク"},
-    {"id": 2, "name": "データ集計", "description": "データを集計するタスク"},
-    {"id": 3, "name": "レポート生成", "description": "レポートを生成するタスク"}
-]
-```
 
 ---
 
@@ -96,7 +81,7 @@ pip install -r requirements.txt
 
 ### 3. アプリケーションを起動
 ```bash
-uvicorn app.main:app --reload
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ---
@@ -104,10 +89,9 @@ uvicorn app.main:app --reload
 ## 使用方法
 
 1. ブラウザまたはAPIクライアントを使用して、以下のURLにアクセスします：
-   - APIドキュメント: http://localhost:8000/docs
-   - 自動化業務の一覧: `http://localhost:8000/tasks`
+   - APIドキュメント: `http://localhost:8000/docs`
    - 精算書生成: `http://localhost:8000/api/v1/settlement/generate`
-   - ブランド検索: http://localhost:8000/process-files/
+   - ブランド検索: `http://localhost:8000/process-files`
 
-2. 必要に応じて、エンドポイントにリクエストを送信して機能を利用します。
+2. 実行したい業務のエンドポイントにリクエストを送信して機能を利用します。
 
