@@ -16,3 +16,4 @@ FastAPI/output_files
 検品チェック/箱番.xlsx
 検品チェック/入力済み.xlsx 
 箱番作成/data.accdb
+.DS_Store
