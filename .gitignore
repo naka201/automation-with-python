@@ -17,3 +17,6 @@ FastAPI/output_files
 検品チェック/入力済み.xlsx 
 箱番作成/data.accdb
 .DS_Store
+入札貼付/バッグ_貼り付け先.xlsx
+入札貼付/宝石_貼り付け先.xlsx
+入札貼付/時計_貼り付け先.xlsx
