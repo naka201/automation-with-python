@@ -107,5 +107,5 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
    - 精算書生成: `http://localhost:8000/api/v1/settlement/generate`
    - ブランド検索: `http://localhost:8000/process-files`
 
-2. 必要に応じて、エンドポイントにリクエストを送信して機能を利用します。
+2. 実行したい業務のエンドポイントにリクエストを送信して機能を利用します。
 
