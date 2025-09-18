@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body { font-family: sans-serif; padding: 20px; }
+      .container { max-width: 500px; margin: auto; }
+      .form-group { margin-bottom: 15px; }
+      label, input, button { font-size: 1.1em; padding: 8px; }
+      input[type="text"], input[type="number"] { width: 95%; }
+      button { cursor: pointer; }
+      .hidden { display: none; }
+      #status-area { margin-top: 15px; padding: 10px; border: 1px solid #ccc; background-color: #f9f9f9; }
+      
+      /* ローディング画面のスタイルを変更 */
+      #loading-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255, 255, 255, 0.8); /* 背景を少し白っぽくして見やすく */
+        color: #333; /* 文字色を黒っぽく */
+        display: flex;
+        flex-direction: column; /* 縦並びに変更 */
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2em; /* 文字サイズ調整 */
+        z-index: 9999;
+      }
+
+      /* ★★★ スピナー（くるくる回るアニメーション）のスタイルを追加 ★★★ */
+      .spinner {
+        border: 8px solid #f3f3f3; /* 薄い灰色 */
+        border-top: 8px solid #3498db; /* 青色 */
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1.5s linear infinite;
+        margin-bottom: 15px; /* スピナーとテキストの間に余白を追加 */
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      #logout-button {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="logout-button" onclick="handleLogout()">ログアウト</button>
+    <div class="container">
+      <h1>検品確認</h1>
+
+      <div id="initial-view">
+        <div class="form-group">
+          <label for="box-number-input">箱番を入力してください。</label>
+          <input type="text" id="box-number-input">
+        </div>
+        <button onclick="handleLookup(this)">業者名を表示</button>
+      </div>
+      
+      <div id="confirmation-view" class="hidden">
+        <div id="status-area">
+          <p><strong>業者名:</strong> <span id="vendor-name-display"></span></p>
+          <p><strong>ステータス(検品):</strong> <span id="status-inspected"></span></p>
+          <p><strong>ステータス(欠番):</strong> <span id="status-missing"></span></p>
+        </div>
+        <p>箱番号と業者名に間違いはないですか？<br>正しければ確認ボタンを押してください。</p>
+        <button onclick="handleConfirm(this)">確認</button>
+        <button onclick="handleReset()">やり直し</button>
+      </div>
+
+      <div id="action-view" class="hidden">
+        <hr>
+        <div class="form-group">
+            <label for="score-input">点数を入力</label>
+            <input type="number" id="score-input">
+        </div>
+         <div class="form-group">
+            <label for="image-upload">画像をアップロード</label>
+            <input type="file" id="image-upload" accept="image/*">
+        </div>
+        <button onclick="handleInspectionComplete(this)">検品完了?</button>
+        <button onclick="handleMissing(this)">欠番?</button>
+      </div>
+
+      <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+        <div id="loading-text">処理中です...</div>
+      </div>
+
+    </div>
+    <?!= include('JavaScript'); ?>
+    <script>
+      function handleLogout() {
+        const logoutButton = document.getElementById('logout-button');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingText = document.getElementById('loading-text');
+
+
+        // Disable button and show overlay
+        logoutButton.disabled = true;
+        loadingText.textContent = 'ログアウトしています...';
+        loadingOverlay.classList.remove('hidden');
+
+        google.script.run.withSuccessHandler(function() {
+          // On success, the page will redirect, so no need to re-enable anything.
+          // ★★★ 修正点 ★★★
+          // トップウィンドウをウェブアプリのURLにリダイレクトさせる
+          window.top.location.href = "<?= ScriptApp.getService().getUrl() ?>";
+        }).withFailureHandler(function(err) {
+          // On failure, hide overlay, re-enable button, and show an error.
+          loadingOverlay.classList.add('hidden');
+          logoutButton.disabled = false;
+          alert('ログアウトに失敗しました: ' + err.message);
+        }).logout();
+      }
+    </script>
+  </body>
+</html>

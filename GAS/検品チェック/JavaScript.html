@@ -1,0 +1,193 @@
+<script>
+  // DOM要素の取得
+  const initialView = document.getElementById('initial-view');
+  const confirmationView = document.getElementById('confirmation-view');
+  const actionView = document.getElementById('action-view');
+  const boxNumberInput = document.getElementById('box-number-input');
+  const vendorNameDisplay = document.getElementById('vendor-name-display');
+  const statusInspected = document.getElementById('status-inspected');
+  const statusMissing = document.getElementById('status-missing');
+  const scoreInput = document.getElementById('score-input');
+  const imageUpload = document.getElementById('image-upload');
+  const loadingOverlay = document.getElementById('loading-overlay');
+  
+  let currentBoxNumber = '';
+
+  // ローディング表示を制御する関数
+  function showLoading(show) {
+    loadingOverlay.classList.toggle('hidden', !show);
+  }
+
+  // 初期状態にリセットする関数
+  function resetUI() {
+    initialView.classList.remove('hidden');
+    confirmationView.classList.add('hidden');
+    actionView.classList.add('hidden');
+    
+    boxNumberInput.value = '';
+    vendorNameDisplay.textContent = '';
+    statusInspected.textContent = '';
+    statusMissing.textContent = '';
+    scoreInput.value = '';
+    if(imageUpload) imageUpload.value = '';
+    currentBoxNumber = '';
+    
+    // 全てのボタンを有効化
+    document.querySelectorAll('button').forEach(btn => btn.disabled = false);
+
+    // ローディング画面を確実に非表示にする
+    loadingOverlay.style.display = 'none';
+    showLoading(false);
+  }
+
+  // ページのDOMコンテンツが読み込まれたらUIをリセット
+  window.addEventListener('DOMContentLoaded', (event) => {
+    resetUI();
+
+    // 箱番号入力フィールドで全角数字が入力されたら半角に自動変換
+    boxNumberInput.addEventListener('input', function(e) {
+      e.target.value = e.target.value.replace(/[０-９]/g, function(s) {
+        return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+      });
+    });
+
+    // 点数入力フィールドで全角数字が入力されたら半角に自動変換
+    scoreInput.addEventListener('input', function(e) {
+      e.target.value = e.target.value.replace(/[０-９]/g, function(s) {
+        return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+      });
+    });
+  });
+
+
+  // 1. 箱番号で情報を検索
+  function handleLookup(button) {
+    currentBoxNumber = boxNumberInput.value.trim();
+    if (!currentBoxNumber) {
+      alert('箱番号を入力してください。');
+      return;
+    }
+    
+    button.disabled = true;
+    showLoading(true);
+
+    google.script.run
+      .withSuccessHandler(info => {
+        showLoading(false);
+        if (!info) {
+          alert('該当する箱番号が見つかりませんでした。');
+          button.disabled = false;
+        } else if (info.error) {
+          alert('エラー: ' + info.error);
+          button.disabled = false;
+        } else {
+          vendorNameDisplay.textContent = info.vendorName;
+          statusInspected.textContent = info.inspected ? '完了' : '未';
+          statusMissing.textContent = info.missing ? '欠番' : 'ー';
+          
+          initialView.classList.add('hidden');
+          confirmationView.classList.remove('hidden');
+        }
+      })
+      .withFailureHandler(err => {
+        showLoading(false);
+        button.disabled = false;
+        alert('サーバーとの通信に失敗しました: ' + err.message);
+      })
+      .getBoxInfo(currentBoxNumber);
+  }
+  
+  // 2. 業者名を確認し、次のステップへ
+  function handleConfirm(button) {
+    confirmationView.classList.add('hidden');
+    actionView.classList.remove('hidden');
+  }
+
+  // 3. やり直し
+  function handleReset() {
+    resetUI();
+  }
+  
+  // 4. 欠番処理
+  function handleMissing(button) {
+    if (!confirm(`箱番 ${currentBoxNumber} を欠番として処理しますか？`)) {
+      return;
+    }
+    
+    button.disabled = true;
+    document.querySelector('#action-view button').disabled = true;
+
+    showLoading(true);
+
+    google.script.run
+      .withSuccessHandler(message => {
+        alert(message);
+        resetUI();
+      })
+      .withFailureHandler(err => {
+        showLoading(false);
+        resetUI();
+        alert('エラー: ' + err.message);
+      })
+      .processMissing(currentBoxNumber);
+  }
+  
+  // 5. 検品完了処理
+  function handleInspectionComplete(button) {
+    const score = scoreInput.value;
+    const file = imageUpload.files[0];
+    
+    if (!score) {
+        alert('点数を入力してください。');
+        return;
+    }
+    if (parseInt(score, 10) > 10) {
+        alert('点数は10以下の数値を入力してください。');
+        return;
+    }
+    if (!file) {
+        alert('画像をアップロードしてください。');
+        return;
+    }
+    
+    button.disabled = true;
+    document.querySelectorAll('#action-view button').forEach(btn => btn.disabled = true);
+    
+    showLoading(true);
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const fileData = e.target.result.split(',')[1];
+      
+      const originalFileName = file.name;
+      const extension = originalFileName.split('.').pop();
+      const newFileName = `${currentBoxNumber}.${extension}`;
+
+      const data = {
+        boxNumber: currentBoxNumber,
+        score: score,
+        fileData: fileData,
+        fileName: newFileName,
+        mimeType: file.type
+      };
+
+      google.script.run
+        .withSuccessHandler(message => {
+          alert(message);
+          resetUI();
+        })
+        .withFailureHandler(err => {
+          showLoading(false);
+          resetUI();
+          alert('エラー: ' + err.message);
+        })
+        .processInspectionComplete(data);
+    };
+    reader.onerror = (err) => {
+        showLoading(false);
+        resetUI();
+        alert('ファイルの読み込みに失敗しました。');
+    };
+    reader.readAsDataURL(file);
+  }
+</script>
