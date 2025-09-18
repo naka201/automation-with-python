@@ -5,12 +5,12 @@
 // 1. 「検品管理データベース」スプレッドシートのID
 // (Webアプリと日次レポートの両方で使用します)
 const DATABASE_SHEET_ID = '127UO42QG5yuYqg41IV5bjL-jmNA4Z9hW3Uiu47Vn5vI'; 
-1bhHsZhq0jRwBmfIZz2f3UB3isoMoKqZokfP7x2njgL0
+
 // 2. 「入力済みマスター」スプレッドシートのID
 // (日次レポート機能でのみ使用します)
 const INPUT_SHEET_ID = '1_RpyL2sYRR7WyuwTpXbjaw9phCOAYKROTCrxu2Td-xw';
 
-// 3. 結果ファイルを出力するGoogleドライブのフォルダID
+// 3. 結果ファイルを出力するGoogleドライブのフォルダID  
 // (日次レポート機能でのみ使用します)
 const OUTPUT_FOLDER_ID = '1joEREmy4QHc_7tZ_acjUSM5tjCQUd--o';
 
@@ -19,6 +19,7 @@ const OUTPUT_FOLDER_ID = '1joEREmy4QHc_7tZ_acjUSM5tjCQUd--o';
 const SPREADSHEET = SpreadsheetApp.openById(DATABASE_SHEET_ID);
 const INSPECTION_SHEET = SPREADSHEET.getSheetByName('検品シート');
 const ACCOUNT_SHEET = SPREADSHEET.getSheetByName('アカウント');
+const BOX_NUMBER_SHEET = SPREADSHEET.getSheetByName('箱番シート');
 
 
 // ====================================================================
@@ -261,7 +262,7 @@ function fetchAndFilterInspectedData(today) {
   const colTimestamp = colIndex('タイムスタンプ');
   const colIsMissing = colIndex('欠番');
   const colIsChecked = colIndex('検品済み');
-  const colVendorCode = colIndex('業者コード');
+  const colVendorCode = colIndex('業者名'); // 「業者コード」から「業者名」に変更
   const colAccount = colIndex('アカウント');
   const colScore = colIndex('点数');
 
@@ -298,7 +299,7 @@ function fetchAndFilterInspectedData(today) {
     .filter(row => row[colIsMissing] !== true && row[colIsChecked] === true && row[colTimestamp])
     .map(row => ({
         boxNum: parseInt(row[colBoxNum], 10),
-        vendorCode: row[colVendorCode]
+        vendorCode: row[colVendorCode] // ここで業者名がセットされる
     }));
 
   return { 
@@ -355,18 +356,58 @@ function checkRecoveredBoxes(allEnteredBoxSet) {
 }
 
 /**
- * 4. 業者ごとの進捗を集計する
+ * 箱番シートを読み込み、「業者名」から「業者コード」への変換マップを作成する
+ * @returns {Map<string, any>} 業者名 → 業者コード の変換マップ
+ */
+function createVendorCodeMapping() {
+  if (!BOX_NUMBER_SHEET) {
+    Logger.log("警告: '箱番シート'が見つかりません。業者コードの変換ができません。");
+    return new Map();
+  }
+  const data = BOX_NUMBER_SHEET.getDataRange().getValues();
+  const mapping = new Map();
+  // ヘッダー行(1行目)をスキップ
+  for (let i = 1; i < data.length; i++) {
+    const vendorName = data[i][1]; // B列が業者名
+    const vendorCode = data[i][2]; // C列が業者コード
+    // まだ登録されていなければ、名前とコードのペアを登録
+    if (vendorName && vendorCode && !mapping.has(vendorName)) {
+      mapping.set(vendorName, vendorCode);
+    }
+  }
+  return mapping;
+}
+
+/**
+ * 4. 業者ごとの進捗を集計する (箱番シート経由で業者コードに変換する新ロジック)
  */
 function calculateVendorProgress(enteredDataSummary, allInspectedData) {
-  const progress = [];
-  const inspectedCountByVendor = new Map();
+  // 手順1: 検品シートから「業者名」ごとの検品数を集計
+  const inspectedCountByName = new Map();
   allInspectedData.forEach(item => {
-      const count = inspectedCountByVendor.get(item.vendorCode) || 0;
-      inspectedCountByVendor.set(item.vendorCode, count + 1);
+      const name = item.vendorCode; // この変数には業者名が格納されている
+      const count = inspectedCountByName.get(name) || 0;
+      inspectedCountByName.set(name, count + 1);
   });
 
+  // 手順2: 箱番シートを使い、「業者名」→「業者コード」の変換マップを作成
+  const vendorNameToCodeMap = createVendorCodeMapping();
+
+  // 手順3: 「業者コード」をキーにした新しい検品数マップを作成
+  const inspectedCountByCode = new Map();
+  inspectedCountByName.forEach((count, name) => {
+    const code = vendorNameToCodeMap.get(name);
+    if (code) {
+      inspectedCountByCode.set(code, count);
+    } else {
+      Logger.log(`警告: 箱番シートで業者名「${name}」に対応する業者コードが見つかりません。`);
+    }
+  });
+
+  // 手順4: 入力済みマスターのデータと、「業者コード」を使って突合
+  const progress = [];
   enteredDataSummary.vendorData.forEach((data, vendorCode) => {
-    const inspectedCount = inspectedCountByVendor.get(vendorCode) || 0;
+    const inspectedCount = inspectedCountByCode.get(vendorCode) || 0;
     progress.push({
       code: vendorCode,
       name: data.vendorName,
@@ -379,6 +420,7 @@ function calculateVendorProgress(enteredDataSummary, allInspectedData) {
   });
   return progress;
 }
+
 
 /**
  * 5. 結果をスプレッドシートに書き出す (最終版)
@@ -540,5 +582,49 @@ function archiveAndClearMonthlyData() {
 
   } catch (e) {
     Logger.log(`エラーが発生しました: ${e.message}`);
+  }
+}
+/**
+ * fetchAndFilterInspectedData関数をテストするためだけの関数
+ */
+function test_myFunction() {
+  // 1. 本来の処理と同様に、日付オブジェクトを作成する
+  const today = new Date();
+  
+  // 2. 作成した日付を引数として渡し、関数を実行する
+  const result = fetchAndFilterInspectedData(today);
+  
+  // 3. 結果をログに出力して確認する
+  Logger.log(JSON.stringify(result, null, 2));
+}
+/**
+ * 業者ごとの進捗計算が正しく行われるかテストする関数
+ */
+function test_VendorProgressCalculation() {
+  try {
+    // 手順1: マスターシートからサマリーを取得
+    const enteredDataSummary = aggregateEnteredData();
+    if (!enteredDataSummary) {
+      Logger.log('入力済みマスターシートのデータ取得に失敗しました。');
+      return;
+    }
+
+    // 手順2: 検品シートからデータを取得
+    const inspectedDataSummary = fetchAndFilterInspectedData(new Date());
+    if (!inspectedDataSummary) {
+      Logger.log('検品シートのデータ取得に失敗しました。');
+      return;
+    }
+    
+    // 手順3: 目的の関数を実行して、業者ごとの進捗サマリーを計算
+    const vendorProgress = calculateVendorProgress(enteredDataSummary, inspectedDataSummary.allInspectedData);
+
+    // 手順4: 計算結果をログに出力
+    Logger.log('--- 業者ごとの進捗サマリー 計算結果 ---');
+    Logger.log(JSON.stringify(vendorProgress, null, 2));
+
+  } catch(e) {
+    Logger.log('テスト実行中にエラーが発生しました: ' + e.message);
+    Logger.log('スタックトレース: ' + e.stack);
   }
 }
