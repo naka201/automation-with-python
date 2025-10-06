@@ -4,15 +4,18 @@
 
 // 1. 「検品管理データベース」スプレッドシートのID
 // (Webアプリと日次レポートの両方で使用します)
-const DATABASE_SHEET_ID = '127UO42QG5yuYqg41IV5bjL-jmNA4Z9hW3Uiu47Vn5vI'; 
+//const DATABASE_SHEET_ID = '127UO42QG5yuYqg41IV5bjL-jmNA4Z9hW3Uiu47Vn5vI'; 
+const DATABASE_SHEET_ID = '<database_id>'; 
 
 // 2. 「入力済みマスター」スプレッドシートのID
 // (日次レポート機能でのみ使用します)
-const INPUT_SHEET_ID = '1_RpyL2sYRR7WyuwTpXbjaw9phCOAYKROTCrxu2Td-xw';
+//const INPUT_SHEET_ID = '1_RpyL2sYRR7WyuwTpXbjaw9phCOAYKROTCrxu2Td-xw';
+const INPUT_SHEET_ID = '<input_id>';
 
 // 3. 結果ファイルを出力するGoogleドライブのフォルダID  
 // (日次レポート機能でのみ使用します)
 const OUTPUT_FOLDER_ID = '1joEREmy4QHc_7tZ_acjUSM5tjCQUd--o';
+const OUTPUT_FOLDER_ID = '<output_id>';
 
 
 // --- グローバル変数 ---
