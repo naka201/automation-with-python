@@ -82,6 +82,7 @@ pip install -r requirements.txt
 ### 3. アプリケーションを起動
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app.main:app --host <IPアドレス> --port 8000 --reload
 ```
 
 ---
@@ -90,8 +91,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 1. ブラウザまたはAPIクライアントを使用して、以下のURLにアクセスします：
    - APIドキュメント: `http://localhost:8000/docs`
-   - 精算書生成: `http://localhost:8000/api/v1/settlement/generate`
-   - ブランド検索: `http://localhost:8000/process-files`
+   - APIドキュメント: `http://<IPアドレス>:8000/docs`
 
 2. 実行したい業務のエンドポイントにリクエストを送信して機能を利用します。
 
